@@ -57,6 +57,7 @@ CREATE TABLE actioocc (
   codigo       VARCHAR(16) NOT NULL,
   actividad    VARCHAR(200) NOT NULL,
   prioridad    INT,
+  estado       INT DEFAULT 0,
   FOREIGN KEY (oocc_id) REFERENCES oocc(id)
 );
 

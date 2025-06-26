@@ -11,7 +11,7 @@
 </head>
 <body>   
     <script>
-    // Mostrar el valor de 'eess' en la consola
+    console.log("=====[ HOJA ]=====");
     console.log("idredx: {{ session('idredx') }} ");
     console.log("redx: {{ session('redx') }}");
     console.log("idesx: {{ session('idesx') }}");
@@ -37,12 +37,6 @@
     </div>
     <div class="titulo">sistema de programación y formulación presupuestal PIA Y POI 2026</div>
     <div class="derecha">
-        <!--form method="POST" action="{{ route('exportaooddhoja') }}" id="exportarForm">
-            @csrf
-            <input type="hidden" name="totalFilasExportar" id="totalFilasExportar">
-            <input type="hidden" name="DataExportar" id="DataExportar">
-            <button type="button" onclick="exportar()" style="background-color:#1b7ec5 !important;">Exportar</button>
-        </form-->
 
         <form method="POST" action="{{ route('exportaooddhoja') }}" id="exportarForm">
             @csrf  <!-- Esto es necesario para proteger el formulario contra CSRF -->
@@ -227,7 +221,7 @@
             <td><input id="v6" type="number" value="0" disabled></td>
             <td><input id="v7" type="number" value="0" disabled></td>
             <td><input id="v8" type="number" value="0" disabled></td>
-            <td><input id="V9" type="number" value="0" disabled></td>
+            <td><input id="v9" type="number" value="0" disabled></td>
             <td><input id="v10" type="number" value="0" disabled></td>
             <td><input id="v11" type="number" value="0" disabled></td>
             <td><input id="v12" type="number" value="0" disabled></td>
@@ -358,7 +352,7 @@
 </div>
 
 <div class="footer">
-    sistema de programación y formulación presupuestal PIA Y POI 2026
+    sistema de programación y formulación presupuestal PIA Y POI 2026 <em>Creado por: HaroldCoilaVillena</em>
 </div>
 
 

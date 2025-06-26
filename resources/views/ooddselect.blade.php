@@ -10,6 +10,12 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+<script>
+    console.log("=====[ SELECT ]=====");
+    console.log("idredx: {{ session('idredx') }} ");
+    console.log("redx: {{ session('redx') }}");
+    console.log("======================");
+</script>
 <div class="todo">
     <div class="container medio">
         <div id="tapa">
@@ -20,17 +26,17 @@
                 </form>
             </div>
             <div id="titulo">{{ session('redx') }}</div>
-            <!--div id="ver">
-                <form action="{{ route('consolida_red') }}" method="POST">
+            <div id="ver">
+                <form action="{{ route('consolidared') }}" method="POST">
                 @csrf
-                    <button class="verbutton" type="submit">Ver consolidado RED</button>
+                <button class="verbutton" type="submit">Ver consolidado RED</button>
                 </form>
-            </div-->
+            </div>
         </div>
         <div class="largo">
             <form action="{{ route('ooddmain') }}" method="POST">
             @csrf
-            <label for="establecimiento">Seleccione su Órgano Desconcentrado</label>
+            <label for="establecimiento">Seleccione su centro gestor</label>
                 <select name="ide_eess" id="ide_eess" required>
                     @foreach($eess as $item)
                         <option value="{{ $item->id }}">{{ $item->codigo }} :: {{ $item->eess }}</option>

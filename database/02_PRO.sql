@@ -81,6 +81,28 @@ $$ LANGUAGE plpgsql;
 -- SELECT etapa1_alimentar_crearhoja_oodd(2);
 -- SELECT etapa1_alimentar_crearhoja_oodd(3);
 
+CREATE OR REPLACE FUNCTION etapa1_alimentar_restaurarhoja_oodd(cabezax INT)
+RETURNS INT AS $$
+DECLARE
+    error INT := 0;         -- Variable para manejar errores
+    filaxx INT := 0;        -- Variable para contar el número de registros en `pofi`
+    i INT := 0;             -- Variable para la iteración interna
+BEGIN
+    DELETE FROM detalle WHERE cabeza_id = cabezax;
+    SELECT COUNT(id) INTO filaxx FROM pofi;
+    
+    FOR i IN 1..filaxx LOOP
+        INSERT INTO detalle (cabeza_id, pofi_id) VALUES (cabezax, i);
+    END LOOP;
+    RETURN 0;
+
+EXCEPTION
+    WHEN OTHERS THEN RETURN 1;
+END;
+$$ LANGUAGE plpgsql;
+
+-- SELECT etapa1_alimentar_restaurarhoja_oodd(1);
+
 CREATE OR REPLACE FUNCTION etapa1_alimentar_crearhoja_oocc_nueva_activ(numerax INT,fondox INT,codex VARCHAR(16),actx VARCHAR(200),priox INT) 
 RETURNS INT AS $$
 DECLARE

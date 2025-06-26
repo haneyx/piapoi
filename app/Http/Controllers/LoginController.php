@@ -40,10 +40,27 @@ class LoginController extends Controller
 
         $usu = Usuario::where('usuario', $validated['usuario'])->first();
 
-        if ($usu && $usu->clave === $validated['clave']) { // LOGIN::ok
+        if ($usu && $usu->clave === $validated['clave']){ // LOGIN::ok
             switch ($usu->tipo) {
-                case 'a': return redirect()->route('ooddmaster');break; 
-                case 'b': return redirect()->route('ooccmaster');break; 
+                case 'a':
+                    $organo = DB::table('oodd')
+                        ->select('id','oodd')
+                        ->orderBy('numera')
+                        ->get();
+
+                    return view('ooddmasterselect', compact('organo'));
+                    break;
+
+                case 'b': // control maestro de oocc
+                    //session()->flush();
+                    $oficina = DB::table('oocc')
+                        ->orderBy('numera')
+                        ->get();
+
+                    return view('ooccmasterselect', compact('oficina'));
+                    break;
+
+                case 'm': return redirect()->route('mastermaster');break;
                 case 'c':
                     $oocc = DB::table('oocc')
                         ->select('id', 'oficina')

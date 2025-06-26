@@ -12,10 +12,12 @@ use PhpOffice\PhpSpreadsheet\Style\Style;
 class DetalleExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
 {
     protected $detalles;
+    protected $tipoexcel;
 
-    public function __construct($detalles)
+    public function __construct($detalles, $tipoexcel = null)
     {
         $this->detalles = $detalles;
+        $this->tipoexcel = $tipoexcel;
     }
 
     /**
@@ -30,18 +32,30 @@ class DetalleExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSi
 
     public function array(): array
     {
-        // Datos estáticos de la sesión (filas 1 a 11)
-        $datos_sesion = [
+        $datos_sesion = [];
+
+        $datos_sesion1 = [
             ['','','Órgano Desconcentrado: '. session('redx')],
             ['','','Cod. Centro Gestores: '. session('codesx')],
             ['','','Establecimiento de Salud: '. session('esx')],
             ['','','Actividad: '. session('nameactiodx')],
             ['','','Prioridad: '. session('prioactiodx')],
-            //['ID Red:', session('idredx')],
-            //['ID Establecimiento:', session('idesx')],
-            //['ID Actividad:', 'N/A'],
-            //['Cabecera:', session('headerx')],
-            //['Cerrado:', session('cerradox')],
+        ];
+        $datos_sesion2 = [
+            ['','','CONSOLIDADO POR ESTABLECIMIENTO DE SALUD'],
+            ['','','Órgano Desconcentrado: '. session('redx')],
+            ['','','Cod. Centro Gestores: '. session('codesx')],
+            ['','','Establecimiento de Salud: '. session('esx')],
+            ['', ''],
+        ];
+        $datos_sesion3 = [
+            ['','','CONSOLIDADO POR RED'],
+            ['','','Órgano Desconcentrado: '. session('redx')],
+            ['','','Cod. Centro Gestores: '. session('codesx')],
+            ['', ''],
+            ['', ''],
+        ];
+        $datos_sesion9 = [
             ['', ''], // Fila vacía en la 12 para separar las cabeceras de los datos
             ['Fondo F.', 'Cod. PoFi', 'Posición Presupuestaria', 'Tipo Gasto',
             'Estimación P. 2025', 'Enero', 'Febrero', 'Marzo', 'Abril',
@@ -49,6 +63,13 @@ class DetalleExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSi
             'Octubre', 'Noviembre', 'Diciembre', 'Total 2026',
             'Proyección 2027','Proyección 2028','Proyección 2029']
         ];
+
+        switch($this->tipoexcel){
+            case 1: $datos_sesion = array_merge($datos_sesion1, $datos_sesion9);break;
+            case 2: $datos_sesion = array_merge($datos_sesion2, $datos_sesion9);break;
+            case 3: $datos_sesion = array_merge($datos_sesion3, $datos_sesion9);break;
+            default: $datos_sesion = $datos_sesion9;
+        }
 
         $tipox = '';
         $tabla_datos = $this->detalles->map(function ($row) {

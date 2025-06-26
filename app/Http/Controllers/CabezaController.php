@@ -170,91 +170,221 @@ class CabezaController extends Controller
                 }
 
                 DB::commit();
-                Log::info('Datos guardados correctamente', ['Data' => $DataGrabar, 'Headerx' => session('headerx')]);
+                //Log::info('Datos guardados correctamente', ['Data' => $DataGrabar, 'Headerx' => session('headerx')]);
 
 
                 return redirect()->route('ooddhoja');  
             } catch (\Exception $r) {
                 DB::rollback();
-                \Log::error("Error al insertar los datos: " . $r->getMessage());
+                //\Log::error("Error al insertar los datos: " . $r->getMessage());
                 
                 return back()->withErrors(['error' => 'Hubo un problema al guardar los datos.']);
             }
         }else{ return redirect()->route('login');}
     }
 
-public function exportaooddhoja(Request $request)
-{
-
-      Log::info('Datos de la sesión:', [
-        'redx' => session('redx'),
-        'codesx' => session('codesx'),
-        'esx' => session('esx'),
-        'nameactiodx' => session('nameactiodx'),
-        'prioactiodx' => session('prioactiodx'),
-        'headerx' => session('headerx'),
-        'cerradox' => session('cerradox')
-    ]);
-
-
-    // Obtener los detalles de la base de datos
-    $detalles = DB::table('detalle as d')
-        ->leftJoin('financia as f', 'd.financia_id', '=', 'f.id')
-        ->leftJoin('pofi as p', 'd.pofi_id', '=', 'p.id')
-        ->select(
-            'd.cabeza_id',
-            'f.id as financia_id',
-            'f.codigo as financia_codigo',
-            'f.fondo',
-            'p.id as pofi_id',
-            'p.codigo as pofi_codigo',
-            'p.pofi',
-            'p.color',
-            'd.tipo',
-            'd.estimacion',
-            'd.enero',
-            'd.febrero',
-            'd.marzo',
-            'd.abril',
-            'd.mayo',
-            'd.junio',
-            'd.julio',
-            'd.agosto',
-            'd.septiembre',
-            'd.octubre',
-            'd.noviembre',
-            'd.diciembre',
-            'd.total2026',
-            'd.proy2027',
-            'd.proy2028',
-            'd.proy2029'
-        )
-        ->where('d.cabeza_id', session('headerx'))
-        ->orderBy('d.pofi_id')
-        ->get();
-
-    // Verificar si hay datos para exportar
-    if ($detalles->isEmpty()) {
-        \Log::warning('La colección de detalles está vacía');
-    } else {
-        \Log::info($detalles);
-    }
-    return Excel::download(new DetalleExport($detalles), 'oodd_hoja2.xlsx');
-}
-
-
-
-    public function consolida_red(Request $request)
+    public function exportaooddhoja(Request $request)
     {
-        $eess = session('eess');
-        if ($eess) {
-            // Pasamos los datos a la vista
-            return view('ooddselect', compact('eess'));
-        } else {
-            // Si no hay datos, puedes redirigir o manejar el error de alguna forma
-            return redirect()->route('login')->withErrors(['error' => 'Datos no encontrados.']);
-        }
+        // Obtener los detalles de la base de datos
+        $detalles = DB::table('detalle as d')
+            ->leftJoin('financia as f', 'd.financia_id', '=', 'f.id')
+            ->leftJoin('pofi as p', 'd.pofi_id', '=', 'p.id')
+            ->select(
+                'd.cabeza_id',
+                'f.id as financia_id',
+                'f.codigo as financia_codigo',
+                'f.fondo',
+                'p.id as pofi_id',
+                'p.codigo as pofi_codigo',
+                'p.pofi',
+                'p.color',
+                'd.tipo',
+                'd.estimacion',
+                'd.enero',
+                'd.febrero',
+                'd.marzo',
+                'd.abril',
+                'd.mayo',
+                'd.junio',
+                'd.julio',
+                'd.agosto',
+                'd.septiembre',
+                'd.octubre',
+                'd.noviembre',
+                'd.diciembre',
+                'd.total2026',
+                'd.proy2027',
+                'd.proy2028',
+                'd.proy2029'
+            )
+            ->where('d.cabeza_id', session('headerx'))
+            ->orderBy('d.pofi_id')
+            ->get();
+        
+        $archivo1 = session('esx').'-'.session('nameactiodx').'.xlsx';
+        return Excel::download(new DetalleExport($detalles,1),$archivo1);//tipo1=consolidado por actividad
     }
+
+    public function consolidaeess()
+    {
+        $detalles = DB::table('detalle as d')
+            ->select([
+                DB::raw('MAX(d.cabeza_id) AS cabeza_id'),
+                'f.id AS financia_id',
+                'f.codigo AS financia_codigo',
+                'f.fondo',
+                'p.id AS pofi_id',
+                'p.codigo AS pofi_codigo',
+                'p.pofi',
+                'p.color',
+                'd.tipo',
+                DB::raw('SUM(d.estimacion) AS estimacion'),
+                DB::raw('SUM(d.enero) AS enero'),
+                DB::raw('SUM(d.febrero) AS febrero'),
+                DB::raw('SUM(d.marzo) AS marzo'),
+                DB::raw('SUM(d.abril) AS abril'),
+                DB::raw('SUM(d.mayo) AS mayo'),
+                DB::raw('SUM(d.junio) AS junio'),
+                DB::raw('SUM(d.julio) AS julio'),
+                DB::raw('SUM(d.agosto) AS agosto'),
+                DB::raw('SUM(d.septiembre) AS septiembre'),
+                DB::raw('SUM(d.octubre) AS octubre'),
+                DB::raw('SUM(d.noviembre) AS noviembre'),
+                DB::raw('SUM(d.diciembre) AS diciembre'),
+                DB::raw('SUM(d.total2026) AS total2026'),
+                DB::raw('SUM(d.proy2027) AS proy2027'),
+                DB::raw('SUM(d.proy2028) AS proy2028'),
+                DB::raw('SUM(d.proy2029) AS proy2029')
+            ])
+            ->leftJoin('financia as f', 'd.financia_id', '=', 'f.id')
+            ->leftJoin('pofi as p', 'd.pofi_id', '=', 'p.id')
+            ->whereIn('d.cabeza_id', function ($query) {
+                $query->select('c.id')
+                    ->from('cabeza as c')
+                    ->join('eess as e', 'c.eess_id', '=', 'e.id')
+                    ->where('e.id', '=', session('idesx'));
+            })
+            ->groupBy('f.id', 'p.id', 'd.tipo', 'f.fondo', 'p.color', 'p.pofi')
+            ->orderBy('pofi_id')
+            ->get();
+
+            $archivo2 = session('esx').'-ConsolidadoDeEESS.xlsx';
+            return Excel::download(new DetalleExport($detalles,2),$archivo2);//tipo2=consolidado de EESS
+    }
+
+
+    public function consolidared()
+    {
+        $detalles = DB::table('detalle as d')
+            ->select([
+                DB::raw('MAX(d.cabeza_id) AS cabeza_id'),
+                'f.id AS financia_id',
+                'f.codigo AS financia_codigo',
+                'f.fondo',
+                'p.id AS pofi_id',
+                'p.codigo AS pofi_codigo',
+                'p.pofi',
+                'p.color',
+                'd.tipo',
+                DB::raw('SUM(d.estimacion) AS estimacion'),
+                DB::raw('SUM(d.enero) AS enero'),
+                DB::raw('SUM(d.febrero) AS febrero'),
+                DB::raw('SUM(d.marzo) AS marzo'),
+                DB::raw('SUM(d.abril) AS abril'),
+                DB::raw('SUM(d.mayo) AS mayo'),
+                DB::raw('SUM(d.junio) AS junio'),
+                DB::raw('SUM(d.julio) AS julio'),
+                DB::raw('SUM(d.agosto) AS agosto'),
+                DB::raw('SUM(d.septiembre) AS septiembre'),
+                DB::raw('SUM(d.octubre) AS octubre'),
+                DB::raw('SUM(d.noviembre) AS noviembre'),
+                DB::raw('SUM(d.diciembre) AS diciembre'),
+                DB::raw('SUM(d.total2026) AS total2026'),
+                DB::raw('SUM(d.proy2027) AS proy2027'),
+                DB::raw('SUM(d.proy2028) AS proy2028'),
+                DB::raw('SUM(d.proy2029) AS proy2029')
+            ])
+            ->leftJoin('financia as f', 'd.financia_id', '=', 'f.id')
+            ->leftJoin('pofi as p', 'd.pofi_id', '=', 'p.id')
+            ->whereExists(function ($query) {
+                $query->select(DB::raw('1'))
+                    ->from('cabeza as c')
+                    ->join('oodd as o', 'c.oodd_id', '=', 'o.id')
+                    ->where('o.id', '=', session('idredx'))
+                    ->whereRaw('c.id = d.cabeza_id');
+            })
+            ->groupBy('f.id', 'p.id', 'd.tipo', 'f.fondo', 'p.color', 'p.pofi')
+            ->orderBy('pofi_id')
+            ->get();
+
+            $archivo3 = session('redx').'-ConsolidadoDeRed.xlsx';
+            return Excel::download(new DetalleExport($detalles,3),$archivo3);//tipo3=consolidado de RED
+
+    }
+
+    // MASTER OOCC 
+    public function ooccmastermain(Request $request)
+    {
+        $results  = DB::table('cabeza')
+            ->join('oocc', 'cabeza.oocc_id', '=', 'oocc.id')
+            ->join('actioocc', 'oocc.id', '=', 'actioocc.oocc_id')
+            ->select(
+                'cabeza.id as cabeza_id',
+                'oocc.id as oocc_id',
+                'actioocc.fondo',
+                'actioocc.codigo',
+                'actioocc.actividad',
+                'actioocc.prioridad',
+                'actioocc.estado'
+            )
+            ->get();
+
+        return view('ooccmastermain',compact('results'));          
+    }
+
+    public function ooddmastermain(Request $request)
+    {
+        $results = DB::table('eess')
+            ->join('cabeza', 'eess.id', '=', 'cabeza.eess_id')
+            ->join('actioodd', 'cabeza.actioodd_id', '=', 'actioodd.id')
+            ->select(
+                'eess.id as eess_id', 
+                'eess.codigo', 
+                'eess.eess', 
+                'cabeza.id as cabeza_id',
+                'cabeza.cerrado',
+                'actioodd.actividad as actividades'
+            )
+            ->where('eess.oodd_id', $request->input('ide_organo'))  // Puedes pasar dinámicamente el valor
+            ->groupBy('eess.id', 'eess.codigo', 'eess.eess', 'cabeza.id', 'actioodd.actividad')
+            ->orderBy('eess.id')
+            ->orderBy('cabeza.id')
+            ->get();
+        
+        return view('ooddmastermain',compact('results'));  
+    }
+
+    public function ooddmasterrestaura(Request $request)
+    {
+        $idexr = $request->input('idexr');
+        $result = DB::select("SELECT etapa1_alimentar_restaurarhoja_oodd(?)", [$idexr]);
+        if ($result[0]->etapa1_alimentar_restaurarhoja_oodd == 0) {
+            return redirect()->route('ooddmastermain');
+        }else{ return redirect()->route('login');}
+        
+    }
+
+    public function ooddmastercambia(Request $request)
+    {
+        $idexc = intval($request->input('idexc'));
+        $cabeza = Cabeza::find($idexc);
+        if ($cabeza->cerrado==0) { $cabeza->cerrado = 1;}
+        else{$cabeza->cerrado = 0;}
+        $cabeza->save();
+
+        return redirect()->route('ooddmastermain')->with('success', 'Oodd cerrado exitosamente');
+    }
+
 
 }
 

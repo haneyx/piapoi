@@ -11,6 +11,16 @@
 </head>
 
 <body>
+<script>
+    console.log("=====[ MAIN ]=====");
+    console.log("idredx: {{ session('idredx') }} ");
+    console.log("redx: {{ session('redx') }}");
+    console.log("idesx: {{ session('idesx') }}");
+    console.log("codesx: {{ session('codesx') }}");
+    console.log("esx: {{ session('esx') }}");
+    console.log("headerx: {{ session('headerx') }}");
+    console.log("======================");
+</script>
 <div class="todo">
     <div class="container largo">
             <div id="tapa">
@@ -21,9 +31,12 @@
                     </form>
                 </div>
                 <div id="titulo" style="margin-top: -10px;">{{ session('redx') }} <BR> {{ session('codesx') }}::{{ session('esx') }}</div>
-                <!--div id="ver">
+                <div id="ver">
+                    <form action="{{ route('consolidaeess') }}" method="POST">
+                    @csrf
                     <button class="verbutton" type="submit">Ver consolidado EESS</button>
-                </div-->
+                    </form>
+                </div>
             </div>
             <div class="largo">
                 <label class="medio1">Seleccione su actividad:</label>
